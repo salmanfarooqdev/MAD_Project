@@ -92,7 +92,7 @@
         android:layout_height="wrap_content"
         android:text="New user?    Sign up"
         android:textColor="#D7E3ED"
-        android:textSize="14sp"
+        android:textSize="15sp"
         android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="72dp"

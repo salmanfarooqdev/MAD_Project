@@ -37,7 +37,7 @@
             android:textColorHint="#999999">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/email"
+                android:id="@+id/etEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="#51E3E3E6"
@@ -55,7 +55,7 @@
             android:textColorHint="#999999">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/password"
+                android:id="@+id/etPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="#51E3E3E6"
@@ -65,7 +65,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
-            android:id="@+id/forgot_password"
+            android:id="@+id/tvForgotPassword"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
@@ -77,7 +77,7 @@
             android:textSize="14sp" />
 
         <Button
-            android:id="@+id/login_button"
+            android:id="@+id/btnLogin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/button_selector"
@@ -85,7 +85,17 @@
             android:clickable="true"
             android:text="Login"
             android:textColor="@android:color/white" />
+
+        <ProgressBar
+            android:id="@+id/progress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="68dp" />
+
+
     </LinearLayout>
+
+
 
     <TextView
         android:id="@+id/signup_link"

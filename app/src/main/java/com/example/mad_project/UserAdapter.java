@@ -12,20 +12,39 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class UserAdapter extends FirebaseRecyclerAdapter<ConnectedUser, UserAdapter.UserViewHolder> {
 
-
+    private final DatabaseReference connectionsRef;
+    private final String userId;
     Context context;
     public UserAdapter(@NonNull FirebaseRecyclerOptions<ConnectedUser> options, Context context) {
         super(options);
         this.context = context;
+        this.connectionsRef = FirebaseDatabase.getInstance().getReference().child("connections");
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        this.userId = (user != null) ? user.getUid() : null;
     }
 
     @Override
     protected void onBindViewHolder(@NonNull UserViewHolder holder, int i, @NonNull ConnectedUser connectedUser) {
 
-        holder.connectedUserName.setText(connectedUser.getConnectedToName());
+        if (connectedUser.getUser1Id().equals(userId)) {
+            holder.connectedUserName.setText(connectedUser.getUser2Name());
+        } else {
+            holder.connectedUserName.setText(connectedUser.getUser1Name());
+        }
+
+        holder.ivDelete.setOnClickListener(v -> {
+            String connectionId = getRef(i).getKey();
+            if (connectionId != null) {
+                connectionsRef.child(connectionId).removeValue();
+            }
+        });
     }
 
     @NonNull

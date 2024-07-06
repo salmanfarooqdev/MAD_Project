@@ -1,51 +1,52 @@
 package com.example.mad_project;
 
 public class ConnectedUser {
-    private String userId;
-    private String name;
-    private String connectedTo;
-    private String connectedToName;
+    private String user1Id;
+    private String user1Name;
+    private String user2Id;
+    private String user2Name;
 
 
     public ConnectedUser() {
     }
 
-    public ConnectedUser(String userId, String name, String connectedTo) {
-        this.userId = userId;
-        this.name = name;
-        this.connectedTo = connectedTo;
+    public ConnectedUser(String user1Id, String user1Name, String user2Id, String user2Name) {
+        this.user1Id = user1Id;
+        this.user1Name = user1Name;
+        this.user2Id = user2Id;
+        this.user2Name = user2Name;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getUser1Id() {
+        return user1Id;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setUser1Id(String user1Id) {
+        this.user1Id = user1Id;
     }
 
-    public String getConnectedToName() {
-        return connectedToName;
+    public String getUser1Name() {
+        return user1Name;
     }
 
-    public void setConnectedToName(String connectedToName) {
-        this.connectedToName = connectedToName;
+    public void setUser1Name(String user1Name) {
+        this.user1Name = user1Name;
     }
 
-    public String getName() {
-        return name;
+    public String getUser2Id() {
+        return user2Id;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setUser2Id(String user2Id) {
+        this.user2Id = user2Id;
     }
 
-    public String getConnectedTo() {
-        return connectedTo;
+    public String getUser2Name() {
+        return user2Name;
     }
 
-    public void setConnectedTo(String connectedTo) {
-        this.connectedTo = connectedTo;
+    public void setUser2Name(String user2Name) {
+        this.user2Name = user2Name;
     }
 }
 

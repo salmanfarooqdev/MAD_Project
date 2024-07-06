@@ -108,16 +108,23 @@ public class Home extends AppCompatActivity {
             }
         });
 
-        // Set up FirebaseRecyclerAdapter
-        Query query = mDatabase.child("connections").orderByChild("userId").equalTo(userId);
+        // Query to check both user1Id and user2Id
+        Query query = mDatabase.child("connections");
 
         FirebaseRecyclerOptions<ConnectedUser> options =
                 new FirebaseRecyclerOptions.Builder<ConnectedUser>()
                         .setQuery(query, ConnectedUser.class)
                         .build();
 
+// Create and set the adapter for the connected users RecyclerView
         adapter = new UserAdapter(options, this);
         connectedUsersRecyclerView.setAdapter(adapter);
+
+
+
+// Combine both adapters or handle them separately
+
+
 
 
     }
@@ -167,55 +174,45 @@ public class Home extends AppCompatActivity {
                             String matchedUserName = userSnapshot.child("name").getValue(String.class);
 
                             // Check if a connection already exists
-                            mDatabase.child("connections").orderByChild("userId").equalTo(userId)
-                                    .addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(DataSnapshot connectionSnapshot) {
-                                            boolean alreadyConnected = false;
-                                            for (DataSnapshot connection : connectionSnapshot.getChildren()) {
-                                                String existingConnection = connection.child("connectedTo").getValue(String.class);
-                                                if (existingConnection != null && existingConnection.equals(matchedUserId)) {
-                                                    alreadyConnected = true;
-                                                    break;
-                                                }
-                                            }
+                            mDatabase.child("connections").addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot connectionSnapshot) {
+                                    boolean alreadyConnected = false;
+                                    for (DataSnapshot connection : connectionSnapshot.getChildren()) {
+                                        String user1 = connection.child("user1Id").getValue(String.class);
+                                        String user2 = connection.child("user2Id").getValue(String.class);
+                                        if ((user1.equals(userId) && user2.equals(matchedUserId)) || (user1.equals(matchedUserId) && user2.equals(userId))) {
+                                            alreadyConnected = true;
+                                            break;
+                                        }
+                                    }
 
-                                            if (!alreadyConnected) {
-                                                // Save connection in the connections node using HashMap
-                                                DatabaseReference connectionsRef = mDatabase.child("connections");
+                                    if (!alreadyConnected) {
+                                        // Save connection in the connections node using HashMap
+                                        DatabaseReference connectionsRef = mDatabase.child("connections");
 
-                                                HashMap<String, Object> connectionMap = new HashMap<>();
-                                                connectionMap.put("userId", userId);
-                                                connectionMap.put("name", userName);
-                                                connectionMap.put("connectedTo", matchedUserId);
-                                                connectionMap.put("connectedToName", matchedUserName);
+                                        HashMap<String, Object> connectionMap = new HashMap<>();
+                                        connectionMap.put("user1Id", userId);
+                                        connectionMap.put("user1Name", userName);
+                                        connectionMap.put("user2Id", matchedUserId);
+                                        connectionMap.put("user2Name", matchedUserName);
 
-                                                String connectionId = connectionsRef.push().getKey();
-                                                if (connectionId != null) {
-                                                    connectionsRef.child(connectionId).setValue(connectionMap);
-                                                }
-
-                                                connectionMap.put("userId", matchedUserId);
-                                                connectionMap.put("name", matchedUserName);
-                                                connectionMap.put("connectedTo", userId);
-                                                connectionMap.put("connectedToName", userName);
-
-                                                connectionId = connectionsRef.push().getKey();
-                                                if (connectionId != null) {
-                                                    connectionsRef.child(connectionId).setValue(connectionMap);
-                                                }
-
-                                                Toast.makeText(Home.this, "Connected successfully", Toast.LENGTH_SHORT).show();
-                                            } else {
-                                                Toast.makeText(Home.this, "You are already connected with this user", Toast.LENGTH_SHORT).show();
-                                            }
+                                        String connectionId = connectionsRef.push().getKey();
+                                        if (connectionId != null) {
+                                            connectionsRef.child(connectionId).setValue(connectionMap);
                                         }
 
-                                        @Override
-                                        public void onCancelled(DatabaseError databaseError) {
-                                            // Handle possible errors
-                                        }
-                                    });
+                                        Toast.makeText(Home.this, "Connected successfully", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        Toast.makeText(Home.this, "You are already connected with this user", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+                                    // Handle possible errors
+                                }
+                            });
                         }
                     }
                 } else {
@@ -229,6 +226,7 @@ public class Home extends AppCompatActivity {
             }
         });
     }
+
 
 
 }

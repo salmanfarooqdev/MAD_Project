@@ -14,14 +14,19 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
 
 public class Home extends AppCompatActivity {
 
@@ -34,6 +39,9 @@ public class Home extends AppCompatActivity {
     EditText connectCodeEditText;
     Button copyButton, connectButton;
     String userId, userName, connectionCode;
+
+    RecyclerView connectedUsersRecyclerView;
+    UserAdapter adapter;
 
 
     @Override
@@ -100,32 +108,46 @@ public class Home extends AppCompatActivity {
             }
         });
 
-        // Listen for connection changes
-        mDatabase.child("users").child(userId).child("connectedTo").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    String connectedUserId = dataSnapshot.getValue(String.class);
-                    if (connectedUserId != null) {
-                        fetchConnectedUserInfo(connectedUserId);
-                    }
-                }
-            }
+        // Set up FirebaseRecyclerAdapter
+        Query query = mDatabase.child("connections").orderByChild("userId").equalTo(userId);
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                // Handle possible errors
-            }
-        });
+        FirebaseRecyclerOptions<ConnectedUser> options =
+                new FirebaseRecyclerOptions.Builder<ConnectedUser>()
+                        .setQuery(query, ConnectedUser.class)
+                        .build();
+
+        adapter = new UserAdapter(options, this);
+        connectedUsersRecyclerView.setAdapter(adapter);
+
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (adapter != null) {
+            adapter.startListening();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (adapter != null) {
+            adapter.stopListening();
+        }
     }
 
     private void init() {
         settingsIcon = findViewById(R.id.settingsIcon);
         connectionCodeTextView = findViewById(R.id.connectionCode);
-        connectedUserInfoTextView = findViewById(R.id.connectedUserInfo);
+        //connectedUserInfoTextView = findViewById(R.id.connectedUserInfo);
         connectCodeEditText = findViewById(R.id.connectCodeEditText);
         copyButton = findViewById(R.id.copyButton);
         connectButton = findViewById(R.id.connectButton);
+
+        connectedUsersRecyclerView = findViewById(R.id.connectedUsersRecyclerView);
+
     }
 
     private void copyToClipboard(String text) {
@@ -142,12 +164,58 @@ public class Home extends AppCompatActivity {
                     for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
                         String matchedUserId = userSnapshot.getKey();
                         if (matchedUserId != null && !matchedUserId.equals(userId)) {
-                            // Establish connection for both users
-                            mDatabase.child("users").child(userId).child("connectedTo").setValue(matchedUserId);
-                            mDatabase.child("users").child(matchedUserId).child("connectedTo").setValue(userId);
+                            String matchedUserName = userSnapshot.child("name").getValue(String.class);
 
-                            Toast.makeText(Home.this, "Connected successfully", Toast.LENGTH_SHORT).show();
-                            return; // Exit loop after first match
+                            // Check if a connection already exists
+                            mDatabase.child("connections").orderByChild("userId").equalTo(userId)
+                                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot connectionSnapshot) {
+                                            boolean alreadyConnected = false;
+                                            for (DataSnapshot connection : connectionSnapshot.getChildren()) {
+                                                String existingConnection = connection.child("connectedTo").getValue(String.class);
+                                                if (existingConnection != null && existingConnection.equals(matchedUserId)) {
+                                                    alreadyConnected = true;
+                                                    break;
+                                                }
+                                            }
+
+                                            if (!alreadyConnected) {
+                                                // Save connection in the connections node using HashMap
+                                                DatabaseReference connectionsRef = mDatabase.child("connections");
+
+                                                HashMap<String, Object> connectionMap = new HashMap<>();
+                                                connectionMap.put("userId", userId);
+                                                connectionMap.put("name", userName);
+                                                connectionMap.put("connectedTo", matchedUserId);
+                                                connectionMap.put("connectedToName", matchedUserName);
+
+                                                String connectionId = connectionsRef.push().getKey();
+                                                if (connectionId != null) {
+                                                    connectionsRef.child(connectionId).setValue(connectionMap);
+                                                }
+
+                                                connectionMap.put("userId", matchedUserId);
+                                                connectionMap.put("name", matchedUserName);
+                                                connectionMap.put("connectedTo", userId);
+                                                connectionMap.put("connectedToName", userName);
+
+                                                connectionId = connectionsRef.push().getKey();
+                                                if (connectionId != null) {
+                                                    connectionsRef.child(connectionId).setValue(connectionMap);
+                                                }
+
+                                                Toast.makeText(Home.this, "Connected successfully", Toast.LENGTH_SHORT).show();
+                                            } else {
+                                                Toast.makeText(Home.this, "You are already connected with this user", Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
+                                            // Handle possible errors
+                                        }
+                                    });
                         }
                     }
                 } else {
@@ -162,20 +230,5 @@ public class Home extends AppCompatActivity {
         });
     }
 
-    private void fetchConnectedUserInfo(String connectedUserId) {
-        mDatabase.child("users").child(connectedUserId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                String connectedUserName = dataSnapshot.child("name").getValue(String.class);
-                if (connectedUserName != null) {
-                    connectedUserInfoTextView.setText(connectedUserName);
-                }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                // Handle possible errors
-            }
-        });
-    }
 }

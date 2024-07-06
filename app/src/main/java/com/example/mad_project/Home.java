@@ -108,18 +108,16 @@ public class Home extends AppCompatActivity {
             }
         });
 
-        // Query to check both user1Id and user2Id
-        Query query = mDatabase.child("connections");
+        Query query = mDatabase.child("connections")
+                .orderByChild("user1Id").equalTo(userId);
 
         FirebaseRecyclerOptions<ConnectedUser> options =
                 new FirebaseRecyclerOptions.Builder<ConnectedUser>()
                         .setQuery(query, ConnectedUser.class)
                         .build();
 
-// Create and set the adapter for the connected users RecyclerView
         adapter = new UserAdapter(options, this);
         connectedUsersRecyclerView.setAdapter(adapter);
-
 
 
 // Combine both adapters or handle them separately
@@ -148,7 +146,6 @@ public class Home extends AppCompatActivity {
     private void init() {
         settingsIcon = findViewById(R.id.settingsIcon);
         connectionCodeTextView = findViewById(R.id.connectionCode);
-        //connectedUserInfoTextView = findViewById(R.id.connectedUserInfo);
         connectCodeEditText = findViewById(R.id.connectCodeEditText);
         copyButton = findViewById(R.id.copyButton);
         connectButton = findViewById(R.id.connectButton);

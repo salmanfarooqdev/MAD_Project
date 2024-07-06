@@ -33,11 +33,12 @@ public class UserAdapter extends FirebaseRecyclerAdapter<ConnectedUser, UserAdap
     @Override
     protected void onBindViewHolder(@NonNull UserViewHolder holder, int i, @NonNull ConnectedUser connectedUser) {
 
-        if (connectedUser.getUser1Id().equals(userId)) {
-            holder.connectedUserName.setText(connectedUser.getUser2Name());
-        } else {
-            holder.connectedUserName.setText(connectedUser.getUser1Name());
-        }
+//        if (connectedUser.getUser1Id().equals(userId)) {
+//            holder.connectedUserName.setText(connectedUser.getUser2Name());
+//        } else {
+//            holder.connectedUserName.setText(connectedUser.getUser1Name());
+//        }
+        holder.connectedUserName.setText(connectedUser.getUser2Name());
 
         holder.ivDelete.setOnClickListener(v -> {
             String connectionId = getRef(i).getKey();

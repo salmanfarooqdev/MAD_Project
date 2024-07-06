@@ -12,6 +12,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MAD_Project"
         tools:targetApi="31">
+        <activity
+            android:name=".UpdateWidget"
+            android:exported="false" />
+
         <receiver
             android:name=".NewAppWidget"
             android:exported="false">

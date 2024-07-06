@@ -1,6 +1,7 @@
 package com.example.mad_project;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,6 +38,13 @@ public class UserAdapter extends FirebaseRecyclerAdapter<ConnectedUser, UserAdap
     @Override
     protected void onBindViewHolder(@NonNull UserViewHolder holder, int position, @NonNull ConnectedUser connectedUser) {
         holder.connectedUserName.setText(connectedUser.getConnectedUserName());
+
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, UpdateWidget.class);
+            intent.putExtra("connectedUserId", connectedUser.getConnectedUserId());
+            context.startActivity(intent);
+        });
+
 
         holder.ivDelete.setOnClickListener(v -> {
             String connectionId = getRef(position).getKey();

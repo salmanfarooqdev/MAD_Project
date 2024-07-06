@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,36 +15,57 @@ import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class UserAdapter extends FirebaseRecyclerAdapter<ConnectedUser, UserAdapter.UserViewHolder> {
 
-    private final DatabaseReference connectionsRef;
+    private final DatabaseReference userConnectionsRef;
     private final String userId;
-    Context context;
+    private final Context context;
+
     public UserAdapter(@NonNull FirebaseRecyclerOptions<ConnectedUser> options, Context context) {
         super(options);
         this.context = context;
-        this.connectionsRef = FirebaseDatabase.getInstance().getReference().child("connections");
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        this.userId = (user != null) ? user.getUid() : null;
+        this.userConnectionsRef = FirebaseDatabase.getInstance().getReference().child("userConnections");
+        this.userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
     }
 
     @Override
-    protected void onBindViewHolder(@NonNull UserViewHolder holder, int i, @NonNull ConnectedUser connectedUser) {
-
-//        if (connectedUser.getUser1Id().equals(userId)) {
-//            holder.connectedUserName.setText(connectedUser.getUser2Name());
-//        } else {
-//            holder.connectedUserName.setText(connectedUser.getUser1Name());
-//        }
-        holder.connectedUserName.setText(connectedUser.getUser2Name());
+    protected void onBindViewHolder(@NonNull UserViewHolder holder, int position, @NonNull ConnectedUser connectedUser) {
+        holder.connectedUserName.setText(connectedUser.getConnectedUserName());
 
         holder.ivDelete.setOnClickListener(v -> {
-            String connectionId = getRef(i).getKey();
+            String connectionId = getRef(position).getKey();
             if (connectionId != null) {
-                connectionsRef.child(connectionId).removeValue();
+                // Remove the connection from current user's list
+                userConnectionsRef.child(userId).child(connectionId).removeValue()
+                        .addOnSuccessListener(aVoid -> {
+                            // Remove the connection from the connected user's list
+                            userConnectionsRef.child(connectedUser.getConnectedUserId())
+                                    .orderByChild("connectedUserId").equalTo(userId)
+                                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                                snapshot.getRef().removeValue();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                                            // Handle database error
+                                            Toast.makeText(context, "Database error: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                        })
+                        .addOnFailureListener(e -> {
+                            // Handle failure to remove connection
+                            Toast.makeText(context, "Failed to remove connection: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        });
             }
         });
     }
@@ -51,19 +73,17 @@ public class UserAdapter extends FirebaseRecyclerAdapter<ConnectedUser, UserAdap
     @NonNull
     @Override
     public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.single_item_connected_users_layout, parent, false);
         return new UserViewHolder(view);
     }
 
-    public class UserViewHolder extends RecyclerView.ViewHolder{
-
+    public static class UserViewHolder extends RecyclerView.ViewHolder {
         TextView connectedUserName;
         ImageView ivDelete;
+
         public UserViewHolder(@NonNull View itemView) {
             super(itemView);
-
             connectedUserName = itemView.findViewById(R.id.connectedUserName);
             ivDelete = itemView.findViewById(R.id.ivDelete);
         }

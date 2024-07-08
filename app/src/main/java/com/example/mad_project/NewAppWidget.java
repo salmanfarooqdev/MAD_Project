@@ -1,57 +1,55 @@
 package com.example.mad_project;
 
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.widget.RemoteViews;
-
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 public class NewAppWidget extends AppWidgetProvider {
 
+    public static final String ACTION_UPDATE_WIDGET = "com.example.mad_project.ACTION_UPDATE_WIDGET";
+
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        // There may be multiple widgets active, so update all of them
         for (int appWidgetId : appWidgetIds) {
-            updateWidgetFromDatabase(context, appWidgetManager, appWidgetId);
+            updateAppWidget(context, appWidgetManager, appWidgetId);
         }
     }
 
-    private void updateWidgetFromDatabase(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
-        DatabaseReference userWidgetsRef = FirebaseDatabase.getInstance().getReference().child("userWidgets");
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+    private void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
 
-        userWidgetsRef.child(userId).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                String widgetText = dataSnapshot.getValue(String.class);
-                if (widgetText != null) {
-                    updateAppWidget(context, appWidgetManager, appWidgetId, widgetText);
-                } else {
-                    updateAppWidget(context, appWidgetManager, appWidgetId, "users text");
-                }
-            }
+        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.new_app_widget);
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                // Handle possible errors
-            }
-        });
+        Intent intent = new Intent(context, UpdateWidget.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+        views.setOnClickPendingIntent(R.id.appwidget_text, pendingIntent); // Assuming R.id.widget_text exists
+
+        appWidgetManager.updateAppWidget(appWidgetId, views);
     }
 
-    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-                                int appWidgetId, String widgetText) {
-        // Construct the RemoteViews object
-        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.new_app_widget);
-        views.setTextViewText(R.id.appwidget_text, widgetText);
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        super.onReceive(context, intent);
 
-        // Instruct the widget manager to update the widget
-        appWidgetManager.updateAppWidget(appWidgetId, views);
+        if (intent.getAction() != null && intent.getAction().equals(ACTION_UPDATE_WIDGET)) {
+
+            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+            ComponentName componentName = new ComponentName(context, NewAppWidget.class);
+            int[] appWidgetIds = appWidgetManager.getAppWidgetIds(componentName);
+
+            // Update
+            if (appWidgetIds != null && appWidgetIds.length > 0) {
+                onUpdate(context, appWidgetManager, appWidgetIds);
+            }
+        }
+    }
+
+    public static void updateWidgets(Context context) {
+        Intent intent = new Intent(context, NewAppWidget.class);
+        intent.setAction(ACTION_UPDATE_WIDGET);
+        context.sendBroadcast(intent);
     }
 }

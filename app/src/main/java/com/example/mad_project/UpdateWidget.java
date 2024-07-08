@@ -1,7 +1,9 @@
 package com.example.mad_project;
 
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.WindowManager;
@@ -50,28 +52,13 @@ public class UpdateWidget extends AppCompatActivity {
                 .child("userWidgets").child(userId);
         userWidgetRef.setValue(text)
                 .addOnSuccessListener(aVoid -> {
-                    // Update successful
                     Toast.makeText(this, "Widget updated successfully", Toast.LENGTH_SHORT).show();
-
-                    // Trigger widget update for all instances
-                    triggerWidgetUpdate();
-
-                    navigateBackToHome(); // Navigate back to home screen
+                    NewAppWidget.updateWidgets(this);
+                    navigateBackToHome();
                 })
                 .addOnFailureListener(e -> {
-                    // Failed to update
                     Toast.makeText(this, "Failed to update widget", Toast.LENGTH_SHORT).show();
                 });
-    }
-
-    private void triggerWidgetUpdate() {
-        // Get all active instances of the widget and trigger an update
-        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
-        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(this, NewAppWidget.class));
-        Intent intent = new Intent(this, NewAppWidget.class);
-        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
-        sendBroadcast(intent);
     }
 
     private void navigateBackToHome() {

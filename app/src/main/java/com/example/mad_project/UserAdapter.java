@@ -71,7 +71,6 @@ public class UserAdapter extends FirebaseRecyclerAdapter<ConnectedUser, UserAdap
                                     });
                         })
                         .addOnFailureListener(e -> {
-                            // Handle failure to remove connection
                             Toast.makeText(context, "Failed to remove connection: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         });
             }

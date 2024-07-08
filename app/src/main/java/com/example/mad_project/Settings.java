@@ -18,7 +18,6 @@ import com.google.firebase.auth.FirebaseAuth;
 public class Settings extends AppCompatActivity {
 
     ImageView backButton;
-
     FirebaseAuth auth;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,13 +45,10 @@ public class Settings extends AppCompatActivity {
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Implement logout logic
-                // For Firebase Auth, sign out the user
-                auth.signOut();
 
-                // Navigate back to login activity or main activity
+                auth.signOut();
                 startActivity(new Intent(Settings.this, MainActivity.class));
-                finish(); // Finish current activity to prevent going back to it with back button
+                finish();
             }
         });
 

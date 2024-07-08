@@ -4,7 +4,6 @@
     android:background="#515050"
     android:layout_height="match_parent">
 
-    <!-- Top Bar -->
     <LinearLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
@@ -15,7 +14,6 @@
         android:paddingEnd="16dp"
         android:background="#59455F">
 
-        <!-- Title or Logo -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -25,7 +23,6 @@
             android:textSize="19sp"
             android:gravity="start|center_vertical" />
 
-        <!-- Settings Icon -->
         <ImageView
             android:id="@+id/settingsIcon"
             android:layout_width="40dp"
@@ -38,7 +35,6 @@
             android:layout_gravity="end|center_vertical" />
     </LinearLayout>
 
-    <!-- Main Content -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -46,7 +42,6 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Connection Code Section -->
         <TextView
             android:id="@+id/connectionCodeLabel"
             android:layout_width="wrap_content"
@@ -79,7 +74,6 @@
                 android:textColor="@android:color/white" />
         </LinearLayout>
 
-        <!-- Connect to User Section -->
         <TextView
             android:id="@+id/connectLabel"
             android:layout_width="wrap_content"
@@ -109,7 +103,6 @@
             android:textColor="@android:color/white"
             android:layout_marginTop="16dp" />
 
-        <!-- Connected User Info -->
         <TextView
             android:id="@+id/connectedUserLabel"
             android:layout_width="wrap_content"

@@ -113,7 +113,6 @@ public class MainActivity extends AppCompatActivity {
         signup_link = findViewById(R.id.signup_link);
         auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
-
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
         tvForgotPassword = findViewById(R.id.tvForgotPassword);

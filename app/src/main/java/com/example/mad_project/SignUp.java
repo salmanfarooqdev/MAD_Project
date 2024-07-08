@@ -163,6 +163,4 @@ public class SignUp extends AppCompatActivity {
         }
         return code.toString();
     }
-
-
 }

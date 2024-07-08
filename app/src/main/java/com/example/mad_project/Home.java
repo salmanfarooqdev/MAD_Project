@@ -70,7 +70,6 @@ public class Home extends AppCompatActivity {
             }
         });
 
-        // Retrieve user's connection code and name from Firebase
         mDatabase.child("users").child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -108,7 +107,7 @@ public class Home extends AppCompatActivity {
             }
         });
 
-        // Query to get connected users
+
         Query query = mDatabase.child("userConnections").child(userId);
 
         FirebaseRecyclerOptions<ConnectedUser> options =
@@ -118,13 +117,6 @@ public class Home extends AppCompatActivity {
 
         adapter = new UserAdapter(options, this);
         connectedUsersRecyclerView.setAdapter(adapter);
-
-
-// Combine both adapters or handle them separately
-
-
-
-
     }
 
     @Override
@@ -149,9 +141,7 @@ public class Home extends AppCompatActivity {
         connectCodeEditText = findViewById(R.id.connectCodeEditText);
         copyButton = findViewById(R.id.copyButton);
         connectButton = findViewById(R.id.connectButton);
-
         connectedUsersRecyclerView = findViewById(R.id.connectedUsersRecyclerView);
-
     }
 
     private void copyToClipboard(String text) {
@@ -172,14 +162,14 @@ public class Home extends AppCompatActivity {
 
                             DatabaseReference userConnectionsRef = mDatabase.child("userConnections");
 
-                            // Add connection to current user's connections
+
                             String connectionId1 = userConnectionsRef.child(userId).push().getKey();
                             HashMap<String, Object> connectionMap1 = new HashMap<>();
                             connectionMap1.put("connectedUserId", matchedUserId);
                             connectionMap1.put("connectedUserName", matchedUserName);
                             userConnectionsRef.child(userId).child(connectionId1).setValue(connectionMap1);
 
-                            // Add connection to matched user's connections
+
                             String connectionId2 = userConnectionsRef.child(matchedUserId).push().getKey();
                             HashMap<String, Object> connectionMap2 = new HashMap<>();
                             connectionMap2.put("connectedUserId", userId);
@@ -196,12 +186,7 @@ public class Home extends AppCompatActivity {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                // Handle possible errors
             }
         });
     }
-
-
-
-
 }

@@ -4,7 +4,6 @@
     android:background="#5E5F61"
     android:layout_height="match_parent">
 
-    <!-- Top Bar -->
     <LinearLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
@@ -15,7 +14,6 @@
         android:paddingEnd="16dp"
         android:background="#59455F">
 
-        <!-- Back Button -->
         <ImageView
             android:id="@+id/backButton"
             android:layout_width="40dp"
